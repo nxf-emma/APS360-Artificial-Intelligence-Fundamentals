@@ -1,0 +1,32 @@
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+
+
+# constant for classes
+emotion_labels = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+y_pred = []
+y_true = []
+# iterate over test data
+for inputs, labels in val_loader:
+        output = model3(inputs) # Feed Network
+
+        output = (torch.max(torch.exp(output), 1)[1]).data.cpu().numpy()
+        #print(output)
+        y_pred.extend(output) # Save Prediction
+        
+        labels = labels.data.cpu().numpy()
+        y_true.extend(labels) # Save Truth
+        #print(labels)
+# Compute confusion matrix:
+cm = confusion_matrix(y_true, y_pred)
+cm_normalised = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+# Plot confusion matrix:
+sns.set(font_scale=1.5) 
+fig, ax = plt.subplots(figsize=(10,10))
+ax = sns.heatmap(cm_normalised, annot=True, linewidths=0, square=False, 
+                 cmap='gray', yticklabels=emotion_labels,
+                 xticklabels=emotion_labels, vmin=0,
+                 vmax=np.max(cm_normalised), fmt=".2f",
+                 annot_kws={"size": 20})
+ax.set(xlabel='Predicted label', ylabel='True label')
